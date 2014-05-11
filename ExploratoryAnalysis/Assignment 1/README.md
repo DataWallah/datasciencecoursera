@@ -7,7 +7,7 @@ I have also included one file (hw1.R) that contains all the code, and a subset o
 The R scripts assume you have installed the 'lubridate' package, and the large data file referenced below is in the same folder as the scripts.
 
 =====================================================
-Original instructions follow below:
+## Original instructions follow below:
 
 This assignment uses data from
 the <a href="http://archive.ics.uci.edu/ml/">UC Irvine Machine
