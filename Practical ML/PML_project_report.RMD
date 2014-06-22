@@ -1,6 +1,6 @@
 ---
 title: "PML Project"
-output: pdf_document
+output: html_document
 ---
 
 ### Practical Machine Learning Project (June 2014)
@@ -11,11 +11,12 @@ This is the required report for the 'Practical Machine Learning' project. It des
 
 More details on the experiment that resulted in this data can be found here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
 
-In the code below I have used the eval=FALSE option so as to suppress evaluation, as it takes a long time and I have already run the analyses. I have also copied/pasted results from the R console output so the formatting is not ideal.
+In the code below I have used the eval=FALSE option in some chunks so as to suppress evaluation, as it takes a long time and I have already run the analyses. I loaded up my prior analysis so as to print the results.
 
 
-```{r,echo=FALSE,cache=TRUE,eval=FALSE}
-
+```{r,echo=FALSE,cache=TRUE}
+load("C:/KK Stuff/KKLaptop-1 Stuff/KK Stuff (New)/Courses/DS Practical ML/ML Project/.RData")
+options(digits=4,warn=-1)
 ```
 
 ```{r,echo=FALSE}
@@ -72,7 +73,7 @@ tst<-read.csv("pml-testing.csv")
 
 Inspection of the data using the summary function showed that the first seven variables in each dataset contained identification information not relevant to the analysis or prediction model. So we remove them. We also remove a number of variables with no values in them (all NAs), as they clearly have no predictive value. The remaining variables all report data from the activity monitors.
 
-```{r,cache=TRUE,eval=FALSE}
+```{r,echo=TRUE,eval=FALSE}
 trn<-trn[,-c(1:7)]
 tst<-tst[,-c(1:7)]
 # Summary of the data shows several columns with only NAs in the training set
@@ -85,7 +86,7 @@ tst<-tst[,which(colsNA==0)]
 
 Since we have such a large data set, let's take a random sample of 20% of the training set with the selection based on the distribution of the response variable (classe) in the training set.
 
-```{r,cache=TRUE,eval=FALSE}
+```{r,echo=TRUE,eval=FALSE}
 # Train a simple tree with cross-validation
 # Use a small sample (20%) to reduce compute time for CV tree
 library(caTools)
@@ -98,54 +99,27 @@ tr1 = subset(trn, split==TRUE)
 
 We will build a simple tree model using randomForest, as this is the easiest and usually very accurate. We have cleaned up our data, and we can now just run the model with cross-validation with 3 folds. Note that we are predicting the 'classe' variable, using all the other variables in the cleaned up data.
 
-```{r,cache=TRUE,eval=FALSE}
+```{r,echo=TRUE,eval=FALSE}
 # Train a simple tree with cross-validation
 library(caret)
 fC1<-trainControl(method="repeatedcv",number=3, repeats=3,verboseIter=TRUE, allowParallel=TRUE)
 rf1<-train(classe~.,method="rf",data=tr1,trControl=fC1)
+```
+```{r}
 rf1
 ```
-Random Forest 
-
-3923 samples
-85 predictors
-5 classes: 'A', 'B', 'C', 'D', 'E' 
-
-No pre-processing
-Resampling: Cross-Validated (3 fold, repeated 3 times) 
-
-Summary of sample sizes: 2615, 2615, 2616, 2616, 2615, 2615, ... 
-
-Resampling results across tuning parameters:
-
-mtry  Accuracy  Kappa  Accuracy SD  Kappa SD  
-  2     0.284     0      0.000109     0         
-  117   0.805     0.751  0.0146       0.0187    
-  6860  0.959     0.948  0.00795      0.01      
-
-Accuracy was used to select the optimal model using  the largest value.  
-The final value used for the model was mtry = 6856  
+ 
 
 The model report shows us the accuracy of the model is 95.9%, so we don't need to build any more models. We can apply the model to the training set, and take a look at the accuracy.
 
 
-```{r,cache=TRUE,eval=FALSE}
+```{r,cache=TRUE}
 # check the accuracy on the training set
+library(caret)
 prf1<-predict(rf1,newdata=trn[,1:85])
 confusionMatrix(trn$classe,prf1)
 ```
-
-Confusion Matrix and Statistics
-
-Overall Statistics
-
-Accuracy : 0.9783  
-95% CI : (0.9762, 0.9803)  
-No Information Rate : 0.2879  
-P-Value [Acc > NIR] : < 2.2e-16  
-
-Kappa : 0.9726  
-Mcnemar's Test P-Value : 7.99e-16         
+    
 
 And we can see from the confusion matrix statistics that the prediction accuracy is 97.83%. This suggests there is some over-fitting going on, however it is beyond the scope of this project to actually remove variables to build a realistic model. 
 

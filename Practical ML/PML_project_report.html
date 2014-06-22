@@ -63,7 +63,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <h3>Introduction</h3>
 <p>This is the required report for the ‘Practical Machine Learning’ project. It describes a predictive model built using a collection of personal activity data, and the results of applying a test set of to the model to get predictions.</p>
 <p>More details on the experiment that resulted in this data can be found here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset).</p>
-<p>In the code below I have used the eval=FALSE option so as to suppress evaluation, as it takes a long time and I have already run the analyses. I have also copied/pasted results from the R console output so the formatting is not ideal.</p>
+<p>In the code below I have used the eval=FALSE option in some chunks so as to suppress evaluation, as it takes a long time and I have already run the analyses. I loaded up my prior analysis so as to print the results.</p>
 </div>
 <div id="data-load" class="section level3">
 <h3>Data Load</h3>
@@ -97,23 +97,69 @@ tr1 = subset(trn, split==TRUE)</code></pre>
 <pre class="r"><code># Train a simple tree with cross-validation
 library(caret)
 fC1&lt;-trainControl(method=&quot;repeatedcv&quot;,number=3, repeats=3,verboseIter=TRUE, allowParallel=TRUE)
-rf1&lt;-train(classe~.,method=&quot;rf&quot;,data=tr1,trControl=fC1)
-rf1</code></pre>
-<p>Random Forest</p>
-<p>3923 samples 85 predictors 5 classes: ‘A’, ‘B’, ‘C’, ‘D’, ‘E’</p>
-<p>No pre-processing Resampling: Cross-Validated (3 fold, repeated 3 times)</p>
-<p>Summary of sample sizes: 2615, 2615, 2616, 2616, 2615, 2615, …</p>
-<p>Resampling results across tuning parameters:</p>
-<p>mtry Accuracy Kappa Accuracy SD Kappa SD<br /> 2 0.284 0 0.000109 0<br /> 117 0.805 0.751 0.0146 0.0187<br /> 6860 0.959 0.948 0.00795 0.01</p>
-<p>Accuracy was used to select the optimal model using the largest value.<br />The final value used for the model was mtry = 6856</p>
+rf1&lt;-train(classe~.,method=&quot;rf&quot;,data=tr1,trControl=fC1)</code></pre>
+<pre class="r"><code>rf1</code></pre>
+<pre><code>## Random Forest 
+## 
+## 3923 samples
+##   85 predictors
+##    5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (3 fold, repeated 3 times) 
+## 
+## Summary of sample sizes: 2615, 2615, 2616, 2616, 2615, 2615, ... 
+## 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy  Kappa  Accuracy SD  Kappa SD
+##   2     0.3       0      1e-04        0       
+##   100   0.8       0.8    0.01         0.02    
+##   7000  1         0.9    0.008        0.01    
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 6856.</code></pre>
 <p>The model report shows us the accuracy of the model is 95.9%, so we don’t need to build any more models. We can apply the model to the training set, and take a look at the accuracy.</p>
 <pre class="r"><code># check the accuracy on the training set
-prf1&lt;-predict(rf1,newdata=trn[,1:85])
-confusionMatrix(trn$classe,prf1)</code></pre>
-<p>Confusion Matrix and Statistics</p>
-<p>Overall Statistics</p>
-<p>Accuracy : 0.9783<br />95% CI : (0.9762, 0.9803)<br />No Information Rate : 0.2879<br />P-Value [Acc &gt; NIR] : &lt; 2.2e-16</p>
-<p>Kappa : 0.9726<br />Mcnemar’s Test P-Value : 7.99e-16</p>
+library(caret)</code></pre>
+<pre><code>## Loading required package: lattice
+## Loading required package: ggplot2</code></pre>
+<pre class="r"><code>prf1&lt;-predict(rf1,newdata=trn[,1:85])</code></pre>
+<pre><code>## Loading required package: randomForest
+## randomForest 4.6-7
+## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre class="r"><code>confusionMatrix(trn$classe,prf1)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 5553   20    3    0    4
+##          B   89 3641   55   11    1
+##          C    1   49 3338   30    4
+##          D    5   10   96 3090   15
+##          E    1    6   12   13 3575
+## 
+## Overall Statistics
+##                                        
+##                Accuracy : 0.978        
+##                  95% CI : (0.976, 0.98)
+##     No Information Rate : 0.288        
+##     P-Value [Acc &gt; NIR] : &lt; 2e-16      
+##                                        
+##                   Kappa : 0.973        
+##  Mcnemar's Test P-Value : 7.99e-16     
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             0.983    0.977    0.953    0.983    0.993
+## Specificity             0.998    0.990    0.995    0.992    0.998
+## Pos Pred Value          0.995    0.959    0.975    0.961    0.991
+## Neg Pred Value          0.993    0.995    0.990    0.997    0.999
+## Prevalence              0.288    0.190    0.179    0.160    0.183
+## Detection Rate          0.283    0.186    0.170    0.157    0.182
+## Detection Prevalence    0.284    0.194    0.174    0.164    0.184
+## Balanced Accuracy       0.991    0.984    0.974    0.988    0.996</code></pre>
 <p>And we can see from the confusion matrix statistics that the prediction accuracy is 97.83%. This suggests there is some over-fitting going on, however it is beyond the scope of this project to actually remove variables to build a realistic model.</p>
 <p>We would expect the out-of-sample accuracy of the model to be below 97.83%, to account for overfitting in the model. Note that the model built by the experiment designers resulted in out-of-sample accuracy of between 70% and 80%.</p>
 </div>
